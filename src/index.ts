@@ -18,9 +18,21 @@ app.use(
   })
 );
 
+const allowedOrigins = [
+  "https://agroscope.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:5175",
+];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
@@ -52,7 +64,4 @@ app.use(
   }
 );
 
-app.listen(PORT, () => {
-  console.log(`AgroScope API running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
-});
+export default app;
