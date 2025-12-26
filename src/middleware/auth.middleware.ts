@@ -14,7 +14,7 @@ export interface AuthenticatedRequest extends Request {
 }
 
 export const authMiddleware = (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ): void => {
@@ -34,7 +34,7 @@ export const authMiddleware = (
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
-    req.user = { id: decoded.userId };
+    (req as AuthenticatedRequest).user = { id: decoded.userId };
     next();
   } catch (err) {
     const error = err as Error;

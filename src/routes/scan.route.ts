@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import multer from "multer";
 import { pool } from "../db";
 import { geminiVisionModel } from "../lib/gemini";
@@ -74,9 +74,9 @@ router.post(
   "/plant",
   authMiddleware,
   upload.single("image"),
-  async (req: AuthenticatedRequest, res): Promise<void> => {
+  async (req: Request, res: Response): Promise<void> => {
     try {
-      const user = req.user;
+      const user = (req as AuthenticatedRequest).user;
 
       if (!user?.id) {
         res.status(401).json({ error: "Unauthorized" });
@@ -219,9 +219,9 @@ router.post(
 router.get(
   "/:id",
   authMiddleware,
-  async (req: AuthenticatedRequest, res): Promise<void> => {
+  async (req: Request, res: Response): Promise<void> => {
     try {
-      const user = req.user;
+      const user = (req as AuthenticatedRequest).user;
 
       if (!user?.id) {
         res.status(401).json({ error: "Unauthorized" });
