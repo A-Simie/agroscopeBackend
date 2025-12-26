@@ -322,7 +322,18 @@ router.patch("/password", authLimiter, async (req, res) => {
     );
 
     if (!validPassword) {
-      return res.status(401).json({ error: "Current password is incorrect" });
+      return res.status(400).json({ error: "Current password is incorrect" });
+    }
+
+    const isSamePassword = await bcrypt.compare(
+      newPassword,
+      user.password_hash
+    );
+
+    if (isSamePassword) {
+      return res.status(400).json({
+        error: "New password cannot be the same as your current password",
+      });
     }
 
     const newHash = await bcrypt.hash(newPassword, 12);
@@ -335,6 +346,20 @@ router.patch("/password", authLimiter, async (req, res) => {
     return res.json({ message: "Password changed successfully" });
   } catch (err) {
     console.error("CHANGE_PASSWORD_ERROR", err);
+
+    if (err instanceof Error) {
+      if (err.name === "JsonWebTokenError") {
+        return res
+          .status(401)
+          .json({ error: "Invalid token. Please login again." });
+      }
+      if (err.name === "TokenExpiredError") {
+        return res
+          .status(401)
+          .json({ error: "Session expired. Please login again." });
+      }
+    }
+
     return res.status(500).json({ error: "Failed to change password" });
   }
 });
